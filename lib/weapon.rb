@@ -1,6 +1,6 @@
 class Weapon < Item
 
-  attr_accessor :name, :weight, :damage 
+  attr_reader :name, :weight, :damage, :range 
 
   def initialize(name, weight, damage)
     super(name, weight)

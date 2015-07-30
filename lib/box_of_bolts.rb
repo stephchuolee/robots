@@ -1,14 +1,16 @@
 
 class BoxOfBolts < Item
 
-  attr_accessor :name, :weight
-
+  attr_reader :name, :weight
+  # HEAL_AMOUNT = 20
   def initialize
     super("Box of bolts", 25)
   end 
 
   def feed(robot)
     robot.heal(20)
+    # alternatively, :: 
+    # robot.health(HEAL_AMOUNT)
   end 
 
 
