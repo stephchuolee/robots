@@ -20,4 +20,5 @@ describe Laser do
   it "should do 25 damage" do
     expect(@laser.damage).to eq(25)
   end
+  
 end

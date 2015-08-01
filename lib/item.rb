@@ -2,7 +2,7 @@
 
 class Item
   #should just be attr_reader
-  attr_accessor :name, :weight
+  attr_reader :name, :weight
 
   def initialize(name, weight)
     @name = name 

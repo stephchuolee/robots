@@ -1,45 +1,53 @@
 require_relative 'errors'
+require 'pry'
 
 class Robot
 
     MAX_WEIGHT = 250
     MAX_HEALTH = 100
 
-attr_accessor :position, :items, :items_weight, :health, :hitpoints, :equipped_weapon, :capacity
+  attr_reader :position, :items, :items_weight, :health, :hitpoints
 
-include Errors 
+
+  attr_accessor :equipped_weapon, :shield_points
+
+  include Errors 
 
   # l/r is index 0, up down is index 1
+
+  @@robot_array = [] 
+
   def initialize
     @position = [0,0] 
     @items = []
     @health = 100 
     @hitpoints = 5
     @equipped_weapon
-  end 
-
+    @shield_points = 50
+    @@robot_array << self 
+  end
 
   #movement methods 
 
   #rewrite position array item 0  
   #### ASK ABOUT THIS ####
   def move_left
-    self.position[0] -= 1
+    @position[0] -= 1
     # @position[0] -= 1
     # position should be an attr_reader
   end 
 
   #rewrite position array item 1 
   def move_right
-    self.position[0] += 1
+    @position[0] += 1
   end 
 
   def move_up
-    self.position[1] += 1
+    @position[1] += 1
   end 
 
   def move_down
-    self.position[1] -= 1
+    @position[1] -= 1
   end 
 
 
@@ -67,55 +75,49 @@ include Errors
     @items_weight 
   end 
 
-  # simpler way of items_weight method 
-  # def items_weight  
-    # items.inject(0) {|sum, item| sum + item.weight}
-  # end 
 
   #health methods 
 
   def wound(damage)
-    if damage > health 
-      self.health = 0 
+    # binding.pry
+    residual_damage = damage - shield_points
+    new_health = @health
+    if residual_damage > 0 
+      @shield_points = 0
+      new_health = @health - residual_damage  
     else 
-      self.health -= damage 
+      @shield_points -= damage 
     end 
 
+    if new_health < 0 
+      @health = 0 
+    else 
+      @health = new_health 
+    end 
 
-    # self.health -= damage 
-    # if health <= 0 
-    #   self.health == 0
-    # end 
-
-    # SIMPLER METHOD: 
-
-    # @health = health - damage < 0 ? 0 : health - damage
-
-    # OR 
-
-    # @health = health - damage < MAX_HEALTH ? MAX_HEALTH : health - damage 
-
-    #DRY:: 
-    # new_health = health - damage  
-    # @health = new_health < MAX_HEALTH ? MAX_HEALTH : new_health 
-
-  end 
+  end
+   
 
   def heal(heal)
-    self.health += heal
+    @health += heal
     if health >= 100
-      self.health = 100
+      @health = 100
     end 
   end 
 
 
-  def heal!
+  def heal!(hp) 
     if health == 0 
-      raise RobotAlreadyDeadError, "You can't heal a dead robot"
-    else 
-      heal
+      raise RobotAlreadyDeadError, "You can't heal a dead robot" 
+    else  
+      heal(hp)
+      # raise RobotAlreadyDeadError, "You can't heal a dead robot" if dead 
+      # else normal heal(amount of healing) 
     end 
   end 
+
+
+
 
   #attack methods
 
@@ -133,17 +135,10 @@ include Errors
       self.equipped_weapon = nil
     end 
 
-    # alternatively
-    # equipped_weapon ? equipped_weapon.hit(enemy) : enemy.wound(DEFAULT_ATTACK)
 
-    # if equipped_weapon 
-    #   equipped_weapon.hit(enemy)
-    # else 
-    #  enemy.wound(DEFAULT_ATTACK)
-    # end 
   end 
 
-  def enemy_nearby?(enemy)
+  def enemy_nearby?(enemy) #(enemy, range) <= range
     ((enemy.position[0] - position[0]).abs <= 1 && (enemy.position[1] == position[1])) || 
     ((enemy.position[1] - position[1]).abs <= 1 && (enemy.position[0] == position[0]))
   end 
@@ -159,16 +154,37 @@ include Errors
     else 
       raise UnattackableEnemy, "You can't attack non-robots!"
     end 
-
   end 
 
+  def x
+    @position[0]
+  end
 
+  def y
+    @position[1]
+  end
 
+  def scan()
+    # Robot.in_position(x, y) +
+    Robot.in_position(x - 1, y) + 
+    Robot.in_position(x + 1, y) +
+    Robot.in_position(x, y - 1) + 
+    Robot.in_position(x, y + 1)
+  end
 
+  ## Class Methods 
 
+  # @@robot_counter = 0 
 
+  def self.in_position(x, y)
 
+    @@robot_array.select do |robot| 
+      robot.position == [x,y]
+    end 
+    #returns an array of all robots in position [x,y]
+  end
 
-
-
+  def self.robot_array
+    @@robot_array
+  end
 end

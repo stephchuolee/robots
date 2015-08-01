@@ -13,6 +13,7 @@ describe Robot do
 
   describe "#wound" do
     it "decreases health" do
+      allow(@robot).to receive(:shield_points).and_return(0)
       @robot.wound(20)
       expect(@robot.health).to eq(80)
     end
@@ -25,6 +26,7 @@ describe Robot do
 
   describe "#heal" do
     it "increases health" do
+      allow(@robot).to receive(:shield_points).and_return(0)
       @robot.wound(40)
       @robot.heal(20)
       expect(@robot.health).to eq(80)
